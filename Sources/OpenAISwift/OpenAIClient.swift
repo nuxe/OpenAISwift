@@ -22,24 +22,36 @@ public final class OpenAIClient {
     private let session: URLSession
     private let apiKey: String
     private let timeout: TimeInterval
-    private let baseURL = "https://api.openai.com/v1"
+    private let baseURL: String
     
     /// Creates a new OpenAI API client.
     ///
     /// - Parameters:
     ///   - apiKey: Your OpenAI API key. You can find this in your OpenAI dashboard.
     ///   - timeout: The timeout interval for requests in seconds. Defaults to 60 seconds.
+    ///   - baseURL: The base URL for the OpenAI API. Defaults to "https://api.openai.com/v1".
+    ///   - session: Optional custom URLSession. If not provided, a new session will be created with the specified timeout.
     ///
     /// - Note: The client will configure a URLSession with the specified timeout for both
-    ///         the request and resource timeouts.
-    public init(apiKey: String, timeout: TimeInterval = 60) {
+    ///         the request and resource timeouts if a custom session is not provided.
+    public init(
+        apiKey: String,
+        timeout: TimeInterval = 60,
+        baseURL: String = "https://api.openai.com/v1",
+        session: URLSession? = nil
+    ) {
         self.apiKey = apiKey
         self.timeout = timeout
+        self.baseURL = baseURL
         
-        let configuration = URLSessionConfiguration.default
-        configuration.timeoutIntervalForRequest = timeout
-        configuration.timeoutIntervalForResource = timeout
-        self.session = URLSession(configuration: configuration)
+        if let session = session {
+            self.session = session
+        } else {
+            let configuration = URLSessionConfiguration.default
+            configuration.timeoutIntervalForRequest = timeout
+            configuration.timeoutIntervalForResource = timeout
+            self.session = URLSession(configuration: configuration)
+        }
     }
     
     /// Creates a URLRequest for an OpenAI API endpoint.
